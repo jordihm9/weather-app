@@ -1,6 +1,9 @@
 import { Fragment, useState } from 'react';
 import { Formik, Form, Field } from 'formik';
 
+import { Body } from './components/Body';
+import { Header } from './components/Header';
+import { Footer } from './components/Footer';
 import { Forecast } from './components/Forecast';
 
 import { getCurrentWeather } from './services/getCurrentWeather';
@@ -40,15 +43,20 @@ export const App: React.FC = () => {
 
   return (
     <Fragment>
-      <Formik
-        initialValues={{search: ''}}
-        onSubmit={async values => setCurrentForecast(await getCurrentWeather(values.search, unit))}
-      >
-        <Form>
-          <Field name="search" />
-        </Form>
-      </Formik>
-      { currentForecast && <Forecast forecast={currentForecast} units={unit} /> }
+      <Header>
+        <Formik
+					initialValues={{search: ''}}
+					onSubmit={async values => setCurrentForecast(await getCurrentWeather(values.search, unit))}
+					>
+					<Form>
+						<Field name="search" />
+					</Form>
+				</Formik>
+      </Header>
+      <Body>
+        { currentForecast && <Forecast forecast={currentForecast} units={unit} /> }
+      </Body>
+      <Footer />
     </Fragment>
   );
 }
