@@ -1,4 +1,54 @@
+import { Fragment, useState } from 'react';
+import { Formik, Form, Field } from 'formik';
+
+import { Forecast } from './components/Forecast';
+
+import { getCurrentWeather } from './services/getCurrentWeather';
+
+export enum Unit {
+  Standard = 'standard',
+  Metric = 'metric',
+  Imperial = 'imperial'
+}
+
+export type Coord = {
+  lon: number,
+  lat: number
+}
+
+export type Weather = {
+  id: number,
+  main: string,
+  description: string
+}
+
+export type ForecastType = {
+  name: string,
+  coord: Coord,
+  weather: Weather[],
+  main: {
+    temp: number,
+    feels_like: number,
+    temp_min: number,
+    temp_max: number
+  }
+}
 
 export const App: React.FC = () => {
-  return <h1>Hello World!</h1>
+  const [unit] = useState(Unit.Metric);
+  const [currentForecast, setCurrentForecast] = useState<ForecastType | null>(null);
+
+  return (
+    <Fragment>
+      <Formik
+        initialValues={{search: ''}}
+        onSubmit={async values => setCurrentForecast(await getCurrentWeather(values.search, unit))}
+      >
+        <Form>
+          <Field name="search" />
+        </Form>
+      </Formik>
+      { currentForecast && <Forecast forecast={currentForecast} units={unit} /> }
+    </Fragment>
+  );
 }
