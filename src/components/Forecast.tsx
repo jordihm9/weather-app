@@ -2,6 +2,8 @@ import { ForecastType, Unit } from '../App';
 
 import { ConditionImage } from './ConditionImage';
 
+import './Forecast.css';
+
 interface Props {
 	forecast: ForecastType,
 	units?: Unit

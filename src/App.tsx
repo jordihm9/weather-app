@@ -8,6 +8,8 @@ import { Forecast } from './components/Forecast';
 
 import { getCurrentWeather } from './services/getCurrentWeather';
 
+import './components/Input.css';
+
 export enum Unit {
   Standard = 'standard',
   Metric = 'metric',
@@ -46,10 +48,13 @@ export const App: React.FC = () => {
       <Header>
         <Formik
 					initialValues={{search: ''}}
-					onSubmit={async values => setCurrentForecast(await getCurrentWeather(values.search, unit))}
+					onSubmit={async (values, {resetForm}) => {
+            setCurrentForecast(await getCurrentWeather(values.search, unit));
+            resetForm();
+          }}
 					>
 					<Form>
-						<Field name="search" />
+						<Field name="search" placeholder="Location..."/>
 					</Form>
 				</Formik>
       </Header>

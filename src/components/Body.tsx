@@ -1,3 +1,4 @@
+import './Body.css';
 
 interface Props {
 	children: React.ReactNode
@@ -5,6 +6,6 @@ interface Props {
 
 export const Body: React.FC<Props> = ({children}) => {
 	return (
-		<div className="body">{children}</div>
+		<main>{children}</main>
 	);
 }

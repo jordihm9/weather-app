@@ -1,15 +1,18 @@
+import { Link } from './Link';
+
+import './Footer.css';
 
 export const Footer: React.FC = () => {
 	return (
-		<div className="footer">
+		<footer>
 			<ul>
 				<li>
-					Powered by: <a href="https://openweathermap.org">OpenWeather</a>
+					Powered by: <Link href="https://openweathermap.org" text="OpenWeather" />
 				</li>
 				<li>
-					Icon Pack by: <a href="https://iconscout.com/icon-pack/weather-daylight-icons">Amedia Utvikling</a>
+					Icon Pack by: <Link href="https://iconscout.com/icon-pack/weather-daylight-icons" text="Amedia Utvikling" />
 				</li>
 			</ul>
-		</div>
+		</footer>
 	);
 }

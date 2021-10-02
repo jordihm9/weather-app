@@ -1,0 +1,25 @@
+input {
+	padding: 0.75em 1.15em;
+	border: 2px solid #fff;
+	border-radius: 5px;
+	outline: none;
+	background: #2C3B46;
+	color: #fff;
+	font-weight: 500;
+	font-size: 1rem;
+	letter-spacing: 0.15em;
+}
+
+input:focus {
+	outline: 1px solid #fff
+}
+
+input::placeholder {
+	color: rgba(255,255,255,0.5);
+}
+
+@media screen and (max-width: 992px) {
+	input {
+		font-size: 0.85rem;
+	}
+}

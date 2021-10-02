@@ -27,6 +27,6 @@ export const ConditionImage: React.FC<Props> = ({ weather }) => {
 	const img = getConditionImageName(weather.id)
 
 	return (
-		<img src={`weather-icons/${img}.svg`} alt={img} />
+		<img className="forecast-icon" src={`weather-icons/${img}.svg`} alt={img} />
 	);
 }

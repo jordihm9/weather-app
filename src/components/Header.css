@@ -1,0 +1,34 @@
+header {
+	height: var(--header-height);
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
+
+header nav {
+	margin: auto;
+	width: 80%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+}
+
+header h1 {
+	font-weight: 300;
+	font-size: 3rem;
+}
+
+@media screen and (max-width: 992px) {
+	header h1 {
+		font-size: 1.75rem;
+	}
+}
+
+@media screen and (max-width: 654px) {
+	header nav {
+		flex-direction: column;
+		justify-content: center;
+		gap: 1rem;
+	}
+}
