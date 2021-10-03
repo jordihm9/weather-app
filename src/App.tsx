@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Formik, Form, Field } from 'formik';
 
 import { Body } from './components/Body';
@@ -39,18 +39,31 @@ export type ForecastType = {
   };
 };
 
-const searchPhraseStorageKey = 'lastSearchPhrase';
+const weatherStorageKey = 'lastWeather';
 
 export const App: React.FC = () => {
   const [unit] = useState(Unit.Metric);
   const [currentForecast, setCurrentForecast] = useState<ForecastType | null>(null);
-  const lastSearchPhrase = localStorage.getItem(searchPhraseStorageKey);
+
+  useEffect(() => {
+    const lastSuccesfullWeather = localStorage.getItem(weatherStorageKey);
+    if (!lastSuccesfullWeather) {
+      return;
+    }
+
+    try {
+      const deserialisedWeather = JSON.parse(lastSuccesfullWeather);
+      setCurrentForecast(deserialisedWeather);
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
 
   return (
     <Fragment>
       <Header>
         <Formik
-          initialValues={{ search: lastSearchPhrase || '' }}
+          initialValues={{ search: '' }}
           onSubmit={async (values, { resetForm }) => {
             try {
               const result = await getCurrentWeather(values.search, unit);
@@ -59,7 +72,8 @@ export const App: React.FC = () => {
               }
               setCurrentForecast(result);
               resetForm();
-              localStorage.setItem(searchPhraseStorageKey, values.search);
+              const serializedWeather = JSON.stringify(result);
+              localStorage.setItem(weatherStorageKey, serializedWeather);
             } catch (error) {
               // TODO: error handling
               console.error(error);
