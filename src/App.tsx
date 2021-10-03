@@ -54,7 +54,10 @@ export const App: React.FC = () => {
           }}
 					>
 					<Form>
-						<Field name="search" placeholder="Location..."/>
+            <div className="search-input">
+              <Field name="search" placeholder="Location..." />
+              <span className="icon" />
+            </div>
 					</Form>
 				</Formik>
       </Header>

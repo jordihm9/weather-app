@@ -19,6 +19,6 @@ body {
 
 @media screen and (max-width: 654px) {
   :root {
-    --header-height: 20vh;
+    --header-height: 25vh;
   }
 }
