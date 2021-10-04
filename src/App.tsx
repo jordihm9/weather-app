@@ -45,22 +45,24 @@ export const App: React.FC = () => {
   const [unit] = useState(Unit.Metric);
   const [currentForecast, setCurrentForecast] = useState<ForecastType | null>(null);
 
-  const fetchWeather = async (searchPhrase: string) => {
+  const fetchWeather = async (searchPhrase: string): Promise<Weather & void> => {
     const result = await getCurrentWeather(searchPhrase, unit);
+
     if (result.cod !== 200) {
-      throw new Error(`Error while fetching weather. ${result.message}`);
+      throw new Error(`Error while fetching weather: ${result.message}`);
     }
+
     setCurrentForecast(result)
+    localStorage.setItem(searchPhraseStorageKey, result.name);
   }
 
   useEffect(() => {
     const lastSearchPhrase = localStorage.getItem(searchPhraseStorageKey);
-    if (!lastSearchPhrase) {
-      return;
-    }
+
+    if (!lastSearchPhrase) return;
 
     fetchWeather(lastSearchPhrase).catch(console.error)
-  }, []);
+  }, []); // eslint-disable-line
 
   return (
     <Fragment>
@@ -69,9 +71,8 @@ export const App: React.FC = () => {
           initialValues={{ search: '' }}
           onSubmit={async (values, { resetForm }) => {
             try {
-              await fetchWeather(values.search)
+              await fetchWeather(values.search);
               resetForm();
-              localStorage.setItem(searchPhraseStorageKey, values.search);
             } catch (error) {
               // TODO: error handling
               console.error(error);
