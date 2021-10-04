@@ -13,50 +13,53 @@ import './components/Input.css';
 export enum Unit {
   Standard = 'standard',
   Metric = 'metric',
-  Imperial = 'imperial',
+  Imperial = 'imperial'
 }
 
 export type Coord = {
-  lon: number;
-  lat: number;
-};
+  lon: number,
+  lat: number
+}
 
 export type Weather = {
-  id: number;
-  main: string;
-  description: string;
-};
+  id: number,
+  main: string,
+  description: string
+}
 
 export type ForecastType = {
-  name: string;
-  coord: Coord;
-  weather: Weather[];
+  name: string,
+  coord: Coord,
+  weather: Weather[],
   main: {
-    temp: number;
-    feels_like: number;
-    temp_min: number;
-    temp_max: number;
-  };
-};
+    temp: number,
+    feels_like: number,
+    temp_min: number,
+    temp_max: number
+  }
+}
 
-const weatherStorageKey = 'lastWeather';
+const searchPhraseStorageKey = 'lastSearchPhrase';
 
 export const App: React.FC = () => {
   const [unit] = useState(Unit.Metric);
   const [currentForecast, setCurrentForecast] = useState<ForecastType | null>(null);
 
+  const fetchWeather = async (searchPhrase: string) => {
+    const result = await getCurrentWeather(searchPhrase, unit);
+    if (result.cod !== 200) {
+      throw new Error(`Error while fetching weather. ${result.message}`);
+    }
+    setCurrentForecast(result)
+  }
+
   useEffect(() => {
-    const lastSuccesfullWeather = localStorage.getItem(weatherStorageKey);
-    if (!lastSuccesfullWeather) {
+    const lastSearchPhrase = localStorage.getItem(searchPhraseStorageKey);
+    if (!lastSearchPhrase) {
       return;
     }
 
-    try {
-      const deserialisedWeather = JSON.parse(lastSuccesfullWeather);
-      setCurrentForecast(deserialisedWeather);
-    } catch (error) {
-      console.error(error);
-    }
+    fetchWeather(lastSearchPhrase).catch(console.error)
   }, []);
 
   return (
@@ -66,14 +69,9 @@ export const App: React.FC = () => {
           initialValues={{ search: '' }}
           onSubmit={async (values, { resetForm }) => {
             try {
-              const result = await getCurrentWeather(values.search, unit);
-              if (result.cod !== 200) {
-                throw new Error(`Error while fetching weather. ${result.message}`);
-              }
-              setCurrentForecast(result);
+              await fetchWeather(values.search)
               resetForm();
-              const serializedWeather = JSON.stringify(result);
-              localStorage.setItem(weatherStorageKey, serializedWeather);
+              localStorage.setItem(searchPhraseStorageKey, values.search);
             } catch (error) {
               // TODO: error handling
               console.error(error);
@@ -92,4 +90,4 @@ export const App: React.FC = () => {
       <Footer />
     </Fragment>
   );
-};
+}

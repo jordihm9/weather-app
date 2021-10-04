@@ -1,4 +1,4 @@
 export interface OpenWeatherFailedResponse {
-  cod: number;
-  message: string;
+  cod: number,
+  message: string
 }
