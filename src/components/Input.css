@@ -6,9 +6,11 @@
 }
 
 .search-input .icon {
-	background-image: url('../images/magnifier.svg');
+	border: none;
+	background: url('../images/magnifier.svg');
 	background-repeat: no-repeat;
 	background-size: contain;
+	cursor: pointer;
 }
 
 input {

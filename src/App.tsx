@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from 'react';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form, Field, FormikHelpers, FormikValues } from 'formik';
 
 import { Body } from './components/Body';
 import { Header } from './components/Header';
@@ -45,17 +45,6 @@ export const App: React.FC = () => {
   const [unit] = useState(Unit.Metric);
   const [currentForecast, setCurrentForecast] = useState<ForecastType | null>(null);
 
-  const fetchWeather = async (searchPhrase: string): Promise<Weather & void> => {
-    const result = await getCurrentWeather(searchPhrase, unit);
-
-    if (result.cod !== 200) {
-      throw new Error(`Error while fetching weather: ${result.message}`);
-    }
-
-    setCurrentForecast(result)
-    localStorage.setItem(searchPhraseStorageKey, result.name);
-  }
-
   useEffect(() => {
     const lastSearchPhrase = localStorage.getItem(searchPhraseStorageKey);
 
@@ -64,25 +53,47 @@ export const App: React.FC = () => {
     fetchWeather(lastSearchPhrase).catch(console.error)
   }, []); // eslint-disable-line
 
+  const fetchWeather = async (searchPhrase: string): Promise<Weather & void> => {
+    const result = await getCurrentWeather(searchPhrase, unit);
+
+    if (result.cod !== 200) {
+      throw new Error(`Error while fetching weather: ${result.message}`);
+    }
+
+    setCurrentForecast(result);
+    localStorage.setItem(searchPhraseStorageKey, result.name);
+  }
+
+  const handleSubmit = async (values: FormikValues, { resetForm }: FormikHelpers<{search: string}>) => {
+    try {
+      await fetchWeather(values.search);
+      resetForm();
+    } catch (error) {
+      // TODO: error handling
+      console.error(error);
+    }
+  }
+
+  const validateSubmit = (values: FormikValues): FormikValues => {
+    const errors: FormikValues = {};
+
+    if (!values.search) errors.search = 'Required!';
+
+    return errors;
+  }
+
   return (
     <Fragment>
       <Header>
         <Formik
           initialValues={{ search: '' }}
-          onSubmit={async (values, { resetForm }) => {
-            try {
-              await fetchWeather(values.search);
-              resetForm();
-            } catch (error) {
-              // TODO: error handling
-              console.error(error);
-            }
-          }}
+          onSubmit={handleSubmit}
+          validate={validateSubmit}
         >
           <Form>
             <div className='search-input'>
               <Field name='search' placeholder='Location...' />
-              <span className='icon' />
+              <button type="submit" className="icon" />
             </div>
           </Form>
         </Formik>
