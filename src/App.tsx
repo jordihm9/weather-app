@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Formik, Form, Field } from 'formik';
 
 import { Body } from './components/Body';
@@ -39,31 +39,54 @@ export type ForecastType = {
   }
 }
 
+const searchPhraseStorageKey = 'lastSearchPhrase';
+
 export const App: React.FC = () => {
   const [unit] = useState(Unit.Metric);
   const [currentForecast, setCurrentForecast] = useState<ForecastType | null>(null);
+
+  const fetchWeather = async (searchPhrase: string) => {
+    const result = await getCurrentWeather(searchPhrase, unit);
+    if (result.cod !== 200) {
+      throw new Error(`Error while fetching weather. ${result.message}`);
+    }
+    setCurrentForecast(result)
+  }
+
+  useEffect(() => {
+    const lastSearchPhrase = localStorage.getItem(searchPhraseStorageKey);
+    if (!lastSearchPhrase) {
+      return;
+    }
+
+    fetchWeather(lastSearchPhrase).catch(console.error)
+  }, []);
 
   return (
     <Fragment>
       <Header>
         <Formik
-					initialValues={{search: ''}}
-					onSubmit={async (values, {resetForm}) => {
-            setCurrentForecast(await getCurrentWeather(values.search, unit));
-            resetForm();
+          initialValues={{ search: '' }}
+          onSubmit={async (values, { resetForm }) => {
+            try {
+              await fetchWeather(values.search)
+              resetForm();
+              localStorage.setItem(searchPhraseStorageKey, values.search);
+            } catch (error) {
+              // TODO: error handling
+              console.error(error);
+            }
           }}
-					>
-					<Form>
-            <div className="search-input">
-              <Field name="search" placeholder="Location..." />
-              <span className="icon" />
+        >
+          <Form>
+            <div className='search-input'>
+              <Field name='search' placeholder='Location...' />
+              <span className='icon' />
             </div>
-					</Form>
-				</Formik>
+          </Form>
+        </Formik>
       </Header>
-      <Body>
-        { currentForecast && <Forecast forecast={currentForecast} units={unit} /> }
-      </Body>
+      <Body>{currentForecast && <Forecast forecast={currentForecast} units={unit} />}</Body>
       <Footer />
     </Fragment>
   );
