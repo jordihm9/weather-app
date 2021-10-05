@@ -22,9 +22,7 @@ export const Forecast: React.FC<Props> = ({forecast, units = Unit.Standard}) => 
 		<div className="current-forecast">
 			<ConditionImage weather={forecast.weather[0]} />
 			<div className="location-name">
-				<h3>
-					{forecast.name}
-				</h3>
+				{forecast.name}
 			</div>
 			<div className="details">
 				<span className="condition">{forecast.weather[0].main} </span>

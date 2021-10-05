@@ -2,11 +2,14 @@ import { Fragment, useEffect, useState } from 'react';
 import { Formik, Form, Field, FormikHelpers, FormikValues } from 'formik';
 
 import { Body } from './components/Body';
+import { AlertMessage } from './components/AlertMessage';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { Forecast } from './components/Forecast';
 
 import { getCurrentWeather } from './services/getCurrentWeather';
+
+import { OpenWeatherFailedResponse } from './services/interfaces';
 
 import './components/Input.css';
 
@@ -43,6 +46,7 @@ const searchPhraseStorageKey = 'lastSearchPhrase';
 
 export const App: React.FC = () => {
   const [unit] = useState(Unit.Metric);
+  const [error, setError] = useState<OpenWeatherFailedResponse | null>(null);
   const [currentForecast, setCurrentForecast] = useState<ForecastType | null>(null);
 
   useEffect(() => {
@@ -53,25 +57,22 @@ export const App: React.FC = () => {
     fetchWeather(lastSearchPhrase).catch(console.error)
   }, []); // eslint-disable-line
 
-  const fetchWeather = async (searchPhrase: string): Promise<Weather & void> => {
+  const fetchWeather = async (searchPhrase: string): Promise<void> => {
     const result = await getCurrentWeather(searchPhrase, unit);
 
     if (result.cod !== 200) {
-      throw new Error(`Error while fetching weather: ${result.message}`);
+      setError(result);
+      setCurrentForecast(null);
+      localStorage.removeItem(searchPhraseStorageKey);
+    } else {
+      setCurrentForecast(result);
+      localStorage.setItem(searchPhraseStorageKey, result.name);
     }
-
-    setCurrentForecast(result);
-    localStorage.setItem(searchPhraseStorageKey, result.name);
   }
 
   const handleSubmit = async (values: FormikValues, { resetForm }: FormikHelpers<{search: string}>) => {
-    try {
-      await fetchWeather(values.search);
-      resetForm();
-    } catch (error) {
-      // TODO: error handling
-      console.error(error);
-    }
+    await fetchWeather(values.search);
+    resetForm();
   }
 
   const validateSubmit = (values: FormikValues): FormikValues => {
@@ -98,7 +99,13 @@ export const App: React.FC = () => {
           </Form>
         </Formik>
       </Header>
-      <Body>{currentForecast && <Forecast forecast={currentForecast} units={unit} />}</Body>
+      <Body>
+        { currentForecast ?
+            <Forecast forecast={currentForecast} units={unit} />
+          : error &&
+            <AlertMessage msg="Location not found!" />
+        }
+      </Body>
       <Footer />
     </Fragment>
   );
