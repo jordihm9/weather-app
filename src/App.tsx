@@ -102,7 +102,7 @@ export const App: React.FC = () => {
       <Body>
         { currentForecast ?
             <Forecast forecast={currentForecast} units={unit} />
-          : error &&
+          : error?.message === 'city not found' &&
             <AlertMessage msg="Location not found!" />
         }
       </Body>
