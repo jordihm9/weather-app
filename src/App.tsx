@@ -43,6 +43,13 @@ export const App: React.FC = () => {
   const [unit] = useState(Unit.Metric);
   const [currentForecast, setCurrentForecast] = useState<ForecastType | null>(null);
 
+  const tempUnit = (): any => {
+    switch (unit) {
+      case Unit.Metric:  return 'ºC';//'&#8451;'
+      case Unit.Imperial: return 'ºF';//'&#8457;'
+      default: return 'K';//'&#8490;'
+    }
+  }
   return (
     <Fragment>
       <Header>
@@ -62,7 +69,7 @@ export const App: React.FC = () => {
 				</Formik>
       </Header>
       <Body>
-        { currentForecast && <Forecast forecast={currentForecast} units={unit} /> }
+        { currentForecast && <Forecast forecast={currentForecast} units={tempUnit()} /> }
       </Body>
       <Footer />
     </Fragment>

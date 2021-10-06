@@ -1,4 +1,5 @@
-import { ForecastType, Unit } from '../App';
+import { useState } from 'react';
+import { ForecastType,Unit} from '../App';
 
 import { ConditionImage } from './ConditionImage';
 
@@ -9,13 +10,40 @@ interface Props {
 	units?: Unit
 }
 
-export const Forecast: React.FC<Props> = ({forecast, units = Unit.Standard}) => {
-	const tempUnit = (): string => {
-		switch (units) {
-			case Unit.Metric: return 'ºC';//'&#8451;'
-			case Unit.Imperial: return 'ºF';//'&#8457;'
-			default: return 'K';//'&#8490;'
+export const Forecast: React.FC<Props> = ({forecast, units }) => {
+	const [newUnits,setNewUnits]=useState<string | undefined>(units);
+	const [newUnit,setNewUnit]=useState(Math.floor(forecast.main.temp_max)/Math.floor(forecast.main.temp_min));	
+	const [celsius, setCelsius] = useState(units===Unit.Metric?true:false);
+	const [kelvin, setKelvin] = useState(units===Unit.Standard?true:false);
+	const [fahrenheit, setFahrenheit] = useState(units===Unit.Imperial?true:false);
+
+	
+	const convertTempUnit = (event:any) => {
+		let newUnit:string=event.target.value;		
+		let ans:number=Math.floor(forecast.main.temp_max)/Math.floor(forecast.main.temp_min);
+		console.log(fahrenheit,celsius,kelvin,newUnit,units)
+		if(newUnit==="Fahrenheit"){
+			 ans=(ans * 9/5)+32;
+			 setFahrenheit(true);
+			 setKelvin(false);
+			 setCelsius(false);
+			 setNewUnits("ºF");
 		}
+		else if( newUnit==="Kelvin"){
+			 ans=ans + 273.15;
+			 setKelvin(true);
+			  setFahrenheit(false);
+			 setCelsius(false);
+			 setNewUnits("K");
+
+		}
+		else{
+			 setCelsius(true);
+			 setFahrenheit(false);
+			 setKelvin(false);
+			 setNewUnits("ºC")
+		}
+		setNewUnit(ans);
 	}
 
 	return (
@@ -29,8 +57,17 @@ export const Forecast: React.FC<Props> = ({forecast, units = Unit.Standard}) => 
 			<div className="details">
 				<span className="condition">{forecast.weather[0].main} </span>
 				<span className="temperatures">
-					{Math.floor(forecast.main.temp_max)}/{Math.floor(forecast.main.temp_min)}{tempUnit()}
+					{newUnit}{newUnits}
 				</span>
+			</div>
+			<div className="temp-units">
+				<input type="checkbox" value="Celsius" name="Celsius"  onChange={convertTempUnit} checked={celsius}/>
+				  <label> Celsius</label>
+				<input type="checkbox" value="Kelvin" name="Kelvin"  onChange={convertTempUnit} checked={kelvin}/>
+				  <label> Kelvin</label>
+				<input type="checkbox" name="Fahrenheit" value="Fahrenheit"  onChange={convertTempUnit} checked={fahrenheit}/>
+				  <label> Fahrenheit</label>
+				
 			</div>
 		</div>
 	);

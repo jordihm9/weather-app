@@ -19,7 +19,7 @@
 	margin-top: 1.5rem;
 	max-width: 300px;
 	display: grid;
-	grid-template-columns: 2fr 1fr;
+	grid-template-columns: 1fr 1fr;
 	font-size: 1.75rem;
 }
 
@@ -31,7 +31,17 @@
 	text-align: right;
 	font-weight: 600;
 }
-
+.temp-units{
+	margin: 1rem;
+	display: flex;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	align-items: center;
+}
+.temp-units input[type="checkbox"],
+.temp-units label{
+	margin: 0.3rem;
+}
 @media screen and (max-width: 992px) {
 	.location-name {
 		font-size: 1.85rem;
