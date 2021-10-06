@@ -1,12 +1,16 @@
-import { Fragment, useState } from 'react';
-import { Formik, Form, Field } from 'formik';
+import { Fragment, useEffect, useState } from 'react';
+import { Formik, Form, Field, FormikHelpers, FormikValues } from 'formik';
 
 import { Body } from './components/Body';
+import { AlertMessage } from './components/AlertMessage';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { Forecast } from './components/Forecast';
+import { Spinner } from './components/Spinner';
 
 import { getCurrentWeather } from './services/getCurrentWeather';
+
+import { OpenWeatherFailedResponse } from './services/interfaces';
 
 import './components/Input.css';
 
@@ -39,9 +43,52 @@ export type ForecastType = {
   }
 }
 
+const searchPhraseStorageKey = 'lastSearchPhrase';
+
 export const App: React.FC = () => {
+  const [loading, setLoading] = useState(true);
   const [unit] = useState(Unit.Metric);
+  const [error, setError] = useState<OpenWeatherFailedResponse | null>(null);
   const [currentForecast, setCurrentForecast] = useState<ForecastType | null>(null);
+
+  useEffect(() => {
+    const lastSearchPhrase = localStorage.getItem(searchPhraseStorageKey);
+
+    if (!lastSearchPhrase) return;
+
+    fetchWeather(lastSearchPhrase);
+  }, []); // eslint-disable-line
+
+  useEffect(() => {
+    setTimeout(() => setLoading(false), 300); // force always show the spinner for at least 300ms
+  }, [currentForecast]);
+
+  const fetchWeather = async (searchPhrase: string): Promise<void> => {
+    const result = await getCurrentWeather(searchPhrase, unit);
+
+    if (result.cod !== 200) {
+      setError(result);
+      setCurrentForecast(null);
+      localStorage.removeItem(searchPhraseStorageKey);
+    } else {
+      setCurrentForecast(result);
+      localStorage.setItem(searchPhraseStorageKey, result.name);
+    }
+  }
+  
+  const handleSubmit = async (values: FormikValues, { resetForm }: FormikHelpers<{search: string}>) => {
+    setLoading(true);
+    await fetchWeather(values.search);
+    resetForm();
+  }
+
+  const validateSubmit = (values: FormikValues): FormikValues => {
+    const errors: FormikValues = {};
+
+    if (!values.search) errors.search = 'Required!';
+
+    return errors;
+  }
 
   const tempUnit = (): any => {
     switch (unit) {
@@ -50,26 +97,32 @@ export const App: React.FC = () => {
       default: return 'K';//'&#8490;'
     }
   }
+
   return (
     <Fragment>
       <Header>
         <Formik
-					initialValues={{search: ''}}
-					onSubmit={async (values, {resetForm}) => {
-            setCurrentForecast(await getCurrentWeather(values.search, unit));
-            resetForm();
-          }}
-					>
-					<Form>
-            <div className="search-input">
-              <Field name="search" placeholder="Location..." />
-              <span className="icon" />
+          initialValues={{ search: '' }}
+          onSubmit={handleSubmit}
+          validate={validateSubmit}
+        >
+          <Form>
+            <div className='search-input'>
+              <Field name='search' placeholder='Location...' />
+              <button type="submit" className="icon" />
             </div>
-					</Form>
-				</Formik>
+          </Form>
+        </Formik>
       </Header>
       <Body>
-        { currentForecast && <Forecast forecast={currentForecast} units={tempUnit()} /> }
+        {
+          loading ? 
+            <Spinner />
+          : currentForecast ?
+            <Forecast forecast={currentForecast} units={tempUnit()}/>
+          : error?.message === 'city not found' &&
+            <AlertMessage msg="Location not found!" />
+        }
       </Body>
       <Footer />
     </Fragment>

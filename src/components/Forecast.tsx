@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ForecastType,Unit} from '../App';
+import { ForecastType} from '../App';
 
 import { ConditionImage } from './ConditionImage';
 
@@ -7,15 +7,15 @@ import './Forecast.css';
 
 interface Props {
 	forecast: ForecastType,
-	units?: Unit
+	units?: string
 }
 
 export const Forecast: React.FC<Props> = ({forecast, units }) => {
 	const [newUnits,setNewUnits]=useState<string | undefined>(units);
 	const [newUnit,setNewUnit]=useState(Math.floor(forecast.main.temp_max)/Math.floor(forecast.main.temp_min));	
-	const [celsius, setCelsius] = useState(units===Unit.Metric?true:false);
-	const [kelvin, setKelvin] = useState(units===Unit.Standard?true:false);
-	const [fahrenheit, setFahrenheit] = useState(units===Unit.Imperial?true:false);
+	const [celsius, setCelsius] = useState(units==='ºC'?true:false);
+	const [kelvin, setKelvin] = useState(units==='K'?true:false);
+	const [fahrenheit, setFahrenheit] = useState(units==='ºF'?true:false);
 
 	
 	const convertTempUnit = (event:any) => {
@@ -50,9 +50,7 @@ export const Forecast: React.FC<Props> = ({forecast, units }) => {
 		<div className="current-forecast">
 			<ConditionImage weather={forecast.weather[0]} />
 			<div className="location-name">
-				<h3>
-					{forecast.name}
-				</h3>
+				{forecast.name}
 			</div>
 			<div className="details">
 				<span className="condition">{forecast.weather[0].main} </span>
