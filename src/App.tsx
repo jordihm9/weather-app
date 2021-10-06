@@ -6,6 +6,7 @@ import { AlertMessage } from './components/AlertMessage';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { Forecast } from './components/Forecast';
+import { Spinner } from './components/Spinner';
 
 import { getCurrentWeather } from './services/getCurrentWeather';
 
@@ -45,6 +46,7 @@ export type ForecastType = {
 const searchPhraseStorageKey = 'lastSearchPhrase';
 
 export const App: React.FC = () => {
+  const [loading, setLoading] = useState(true);
   const [unit] = useState(Unit.Metric);
   const [error, setError] = useState<OpenWeatherFailedResponse | null>(null);
   const [currentForecast, setCurrentForecast] = useState<ForecastType | null>(null);
@@ -54,8 +56,12 @@ export const App: React.FC = () => {
 
     if (!lastSearchPhrase) return;
 
-    fetchWeather(lastSearchPhrase).catch(console.error)
+    fetchWeather(lastSearchPhrase);
   }, []); // eslint-disable-line
+
+  useEffect(() => {
+    setTimeout(() => setLoading(false), 300); // force always show the spinner for at least 300ms
+  }, [currentForecast]);
 
   const fetchWeather = async (searchPhrase: string): Promise<void> => {
     const result = await getCurrentWeather(searchPhrase, unit);
@@ -69,8 +75,9 @@ export const App: React.FC = () => {
       localStorage.setItem(searchPhraseStorageKey, result.name);
     }
   }
-
+  
   const handleSubmit = async (values: FormikValues, { resetForm }: FormikHelpers<{search: string}>) => {
+    setLoading(true);
     await fetchWeather(values.search);
     resetForm();
   }
@@ -100,7 +107,10 @@ export const App: React.FC = () => {
         </Formik>
       </Header>
       <Body>
-        { currentForecast ?
+        {
+          loading ? 
+            <Spinner />
+          : currentForecast ?
             <Forecast forecast={currentForecast} units={unit} />
           : error?.message === 'city not found' &&
             <AlertMessage msg="Location not found!" />
