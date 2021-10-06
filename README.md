@@ -2,23 +2,26 @@
 
 Install the dependencies using:
 ```
-npm install
+yarn install
 ```
 
-Run the app in the development mode.\
+# Development
+1. Go to [Open Weather](https://openweathermap.org) and request an API key.
+2. Make a copy of `.env.production` to `.env`.
+```
+cp .env.production .env
+```
+3. Open the `.env` file and put the api key to `REACT_APP_OPENWEATHER_API_KEY` key.
+4. Run the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 ```
 npm start
 ```
 
-Launch the test runner in the interactive watch mode.
+# Production
+Create the optimized version for production running:
 ```
-npm test
-```
-
-Launch the sass compiler in watch mode.
-```
-npm run sass
+yarn build
 ```
 
  > This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
