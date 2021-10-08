@@ -47,7 +47,9 @@ const searchPhraseStorageKey = 'lastSearchPhrase';
 
 export const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
+
   const [unit] = useState(Unit.Metric);
+  
   const [error, setError] = useState<OpenWeatherFailedResponse | null>(null);
   const [currentForecast, setCurrentForecast] = useState<ForecastType | null>(null);
 
@@ -90,13 +92,6 @@ export const App: React.FC = () => {
     return errors;
   }
 
-  const tempUnit = (): any => {
-    switch (unit) {
-      case Unit.Metric:  return 'ºC';//'&#8451;'
-      case Unit.Imperial: return 'ºF';//'&#8457;'
-      default: return 'K';//'&#8490;'
-    }
-  }
 
   return (
     <Fragment>
@@ -119,7 +114,7 @@ export const App: React.FC = () => {
           loading ? 
             <Spinner />
           : currentForecast ?
-            <Forecast forecast={currentForecast} units={tempUnit()}/>
+            <Forecast forecast={currentForecast} units={unit}/>
           : error?.message === 'city not found' &&
             <AlertMessage msg="Location not found!" />
         }

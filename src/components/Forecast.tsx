@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ForecastType} from '../App';
+import { ForecastType,Unit} from '../App';
 
 import { ConditionImage } from './ConditionImage';
 
@@ -7,50 +7,55 @@ import './Forecast.css';
 
 interface Props {
 	forecast: ForecastType,
-	units?: string
+	units?: Unit
 }
 
-export const Forecast: React.FC<Props> = ({forecast, units }) => {
-	const [newUnits,setNewUnits]=useState<string | undefined>(units);
-	const [newUnit,setNewUnit]=useState(Math.floor(forecast.main.temp_max)/Math.floor(forecast.main.temp_min));	
-	const [celsius, setCelsius] = useState(units==='ºC'?true:false);
-	const [kelvin, setKelvin] = useState(units==='K'?true:false);
-	const [fahrenheit, setFahrenheit] = useState(units==='ºF'?true:false);
-
+export const Forecast: React.FC<Props> = ({forecast, units}) => {
 	
-	const convertTempUnit = (event:any) => {
-		let newUnit:string=event.target.value;		
-		let ans:number=Math.floor(forecast.main.temp_max)/Math.floor(forecast.main.temp_min);
-		console.log(fahrenheit,celsius,kelvin,newUnit,units)
-		if(newUnit==="Fahrenheit"){
-			 ans=(ans * 9/5)+32;
-			 setFahrenheit(true);
-			 setKelvin(false);
-			 setCelsius(false);
-			 setNewUnits("ºF");
-		}
-		else if( newUnit==="Kelvin"){
-			 ans=ans + 273.15;
-			 setKelvin(true);
-			  setFahrenheit(false);
-			 setCelsius(false);
-			 setNewUnits("K");
+	const [newUnits,setNewUnits]=useState<string>('ºC');
+	
+	const [newUnit,setNewUnit]=useState(Math.floor(forecast.main.temp_max)/Math.floor(forecast.main.temp_min));	
+	
+	const [celsius, setCelsius] = useState(units===Unit.Metric?true:false);
+	const [kelvin, setKelvin] = useState(units===Unit.Standard?true:false);
+	const [fahrenheit, setFahrenheit] = useState(units===Unit.Imperial?true:false);
 
-		}
-		else{
-			 setCelsius(true);
-			 setFahrenheit(false);
-			 setKelvin(false);
-			 setNewUnits("ºC")
+	const convertTempUnit = (event: React.ChangeEvent<HTMLInputElement>) => {
+		let newUnit:string=event.target.name;		
+		let ans:number=Math.floor(forecast.main.temp_max)/Math.floor(forecast.main.temp_min);
+		switch (newUnit) {
+		      case Unit.Metric:  
+		      	 setCelsius(true);
+				 setFahrenheit(false);
+				 setKelvin(false);
+				 setNewUnits("ºC");
+				 break;
+		      case Unit.Imperial: 
+		      	 ans=(ans * 9/5)+32;
+				 setFahrenheit(true);
+				 setKelvin(false);
+				 setCelsius(false);
+				 setNewUnits("ºF");
+				 break;
+		      default: 
+		      	 ans=ans + 273.15;
+				 setKelvin(true);
+				  setFahrenheit(false);
+				 setCelsius(false);
+				 setNewUnits("K");
+				 break;
 		}
 		setNewUnit(ans);
 	}
+	
 
 	return (
 		<div className="current-forecast">
 			<ConditionImage weather={forecast.weather[0]} />
 			<div className="location-name">
-				{forecast.name}
+				<h3>
+					{forecast.name}
+				</h3>
 			</div>
 			<div className="details">
 				<span className="condition">{forecast.weather[0].main} </span>
@@ -59,11 +64,11 @@ export const Forecast: React.FC<Props> = ({forecast, units }) => {
 				</span>
 			</div>
 			<div className="temp-units">
-				<input type="checkbox" value="Celsius" name="Celsius"  onChange={convertTempUnit} checked={celsius}/>
+				<input type="checkbox" value="Celsius" name={Unit.Metric}  onChange={convertTempUnit} checked={celsius}/>
 				  <label> Celsius</label>
-				<input type="checkbox" value="Kelvin" name="Kelvin"  onChange={convertTempUnit} checked={kelvin}/>
+				<input type="checkbox" value="Kelvin" name={Unit.Standard}  onChange={convertTempUnit} checked={kelvin}/>
 				  <label> Kelvin</label>
-				<input type="checkbox" name="Fahrenheit" value="Fahrenheit"  onChange={convertTempUnit} checked={fahrenheit}/>
+				<input type="checkbox" name={Unit.Imperial} value="Fahrenheit" onChange={convertTempUnit} checked={fahrenheit}/>
 				  <label> Fahrenheit</label>
 				
 			</div>
