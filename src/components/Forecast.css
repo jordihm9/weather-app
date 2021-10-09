@@ -25,7 +25,7 @@
 	text-align: right;
 	font-weight: 600;
 }
-.temp-units{
+/*.temp-units{
 	margin: 1rem;
 	display: flex;
 	justify-content: space-between;
@@ -35,7 +35,7 @@
 .temp-units input[type="checkbox"],
 .temp-units label{
 	margin: 0.3rem;
-}
+}*/
 @media screen and (max-width: 992px) {
 	.location-name {
 		font-size: 1.85rem;
