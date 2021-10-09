@@ -1,16 +1,19 @@
-import { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Formik, Form, Field, FormikHelpers, FormikValues } from 'formik';
 
-import { Body } from './components/Body';
+import { useGeolocation } from './hooks/useGeolocation';
+
 import { AlertMessage } from './components/AlertMessage';
-import { Header } from './components/Header';
+import { Body } from './components/Body';
+import { Button } from './components/Button';
 import { Footer } from './components/Footer';
 import { Forecast } from './components/Forecast';
+import { Header } from './components/Header';
 import { Spinner } from './components/Spinner';
 
-import { getCurrentWeather } from './services/getCurrentWeather';
+import { getCurrentWeather } from './services/openWeatherMap';
 
-import { OpenWeatherFailedResponse } from './services/interfaces';
+import { OpenWeatherFailedResponse } from './services/openWeatherMap';
 
 import './components/Input.css';
 
@@ -50,6 +53,7 @@ export const App: React.FC = () => {
   const [unit] = useState(Unit.Metric);
   const [error, setError] = useState<OpenWeatherFailedResponse | null>(null);
   const [currentForecast, setCurrentForecast] = useState<ForecastType | null>(null);
+  const {geolocation, getGeolocation} = useGeolocation();
 
   useEffect(() => {
     const lastSearchPhrase = localStorage.getItem(searchPhraseStorageKey);
@@ -63,8 +67,16 @@ export const App: React.FC = () => {
     setTimeout(() => setLoading(false), 300); // force always show the spinner for at least 300ms
   }, [currentForecast]);
 
-  const fetchWeather = async (searchPhrase: string): Promise<void> => {
-    const result = await getCurrentWeather(searchPhrase, unit);
+  useEffect(() => {
+    if (geolocation) {
+      if (geolocation instanceof GeolocationPosition) {
+        fetchWeather(geolocation.coords);
+      }
+    }
+  }, [geolocation]); //eslint-disable-line
+
+  const fetchWeather = async (location: string | GeolocationCoordinates): Promise<void> => {
+    const result = await getCurrentWeather(location, unit)
 
     if (result.cod !== 200) {
       setError(result);
@@ -75,7 +87,7 @@ export const App: React.FC = () => {
       localStorage.setItem(searchPhraseStorageKey, result.name);
     }
   }
-  
+
   const handleSubmit = async (values: FormikValues, { resetForm }: FormikHelpers<{search: string}>) => {
     setLoading(true);
     await fetchWeather(values.search);
@@ -112,8 +124,18 @@ export const App: React.FC = () => {
             <Spinner />
           : currentForecast ?
             <Forecast forecast={currentForecast} units={unit} />
-          : error?.message === 'city not found' &&
+          : error?.message === 'city not found' ?
             <AlertMessage msg="Location not found!" />
+          : geolocation instanceof GeolocationPositionError ?
+            <AlertMessage msg="Geolocation failed!" />
+          :
+            <div>
+              <img src="logo192.png" alt="App Logo" />
+              <Button onClick={getGeolocation}>
+                <img src="images/location.svg" alt="GPS location icon" />
+                <span>Use my location</span>
+              </Button>
+            </div>
         }
       </Body>
       <Footer />
