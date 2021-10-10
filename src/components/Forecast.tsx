@@ -11,16 +11,22 @@ interface Props {
 }
 
 function useTemperatureConverter() {
-	return function(temp: number, toUnit:Unit):number{
+	return function(maxTemp: number,minTemp: number, toUnit:Unit):number[]{
 		switch (toUnit) {
 		      case Unit.Imperial: 
-		      	 temp=Math.floor((temp * 9/5)+32);
+		      	 maxTemp=Math.floor((maxTemp * 9/5)+32);
+		      	 minTemp=Math.floor((minTemp * 9/5)+32);
 				 break;
+			  case Unit.Standard: 
+			     maxTemp=Math.floor(maxTemp + 273.15);
+		      	 minTemp=Math.floor(minTemp + 273.15);
+		      	 break;
 		      default: 
-		      	 temp=Math.floor(temp + 273.15);
+	      		 maxTemp=Math.floor(maxTemp);
+	      		 minTemp=Math.floor(minTemp);
 				 break;
 		}
-		return temp;
+		return [maxTemp,minTemp];
 	}
   
 }
@@ -29,8 +35,8 @@ export const Forecast: React.FC<Props> = ({forecast, units}) => {
 	
 	const [tempUnits,setTempUnits]=useState<string>("ºC");
 	
-	const [temp,setTemp]=useState<number>(Math.floor((Math.floor(forecast.main.temp_max)/Math.floor(forecast.main.temp_min))));
-	
+	const [maxTemp,setMaxTemp]=useState<number>(Math.floor(forecast.main.temp_max));
+	const [minTemp,setMinTemp]=useState<number>(Math.floor(forecast.main.temp_min))
 	
 	const tempConverter = useTemperatureConverter();
 	
@@ -45,12 +51,10 @@ export const Forecast: React.FC<Props> = ({forecast, units}) => {
 	const convertTempUnit = (event: React.ChangeEvent<HTMLInputElement>) => {
 		let toUnit:Unit	=event.target.name as Unit;		
 		
-		let oldTemp:number=Math.floor(Math.floor(forecast.main.temp_max)/Math.floor(forecast.main.temp_min));
+		let [newMaxTemp,newMinTemp]=tempConverter(forecast.main.temp_max,forecast.main.temp_min,toUnit);
 		
-		let newTemp=tempConverter(oldTemp,toUnit);
-		
-		setTemp(newTemp);
-
+		setMaxTemp(newMaxTemp);
+		setMinTemp(newMinTemp);
 		setTempUnits(tempUnit(toUnit));
 	}
 	
@@ -66,7 +70,7 @@ export const Forecast: React.FC<Props> = ({forecast, units}) => {
 			<div className="details">
 				<span className="condition">{forecast.weather[0].main} </span>
 				<span className="temperatures">
-					{temp}{tempUnits}
+					{`${maxTemp}/${minTemp}`}{tempUnits}
 				</span>
 			</div>
 			{/*<div className="temp-units">
