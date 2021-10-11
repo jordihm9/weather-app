@@ -50,7 +50,7 @@ const searchPhraseStorageKey = 'lastSearchPhrase';
 
 export const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
-  const [unit] = useState(Unit.Metric);
+  const [unit, setUnit] = useState(Unit.Metric);
   const [error, setError] = useState<OpenWeatherFailedResponse | null>(null);
   const [currentForecast, setCurrentForecast] = useState<ForecastType | null>(null);
   const {geolocation, getGeolocation} = useGeolocation();
@@ -123,7 +123,11 @@ export const App: React.FC = () => {
           loading ? 
             <Spinner />
           : currentForecast ?
-            <Forecast forecast={currentForecast} units={unit} />
+            <Forecast
+              forecast={currentForecast}
+              setUnit={setUnit}
+              unit={unit}
+            />
           : error?.message === 'city not found' ?
             <AlertMessage msg="Location not found!" />
           : geolocation instanceof GeolocationPositionError ?
